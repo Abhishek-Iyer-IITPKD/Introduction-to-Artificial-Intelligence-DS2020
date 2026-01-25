@@ -215,8 +215,8 @@ if __name__ == "__main__":
     # ]
 
     game = YantraCollector(grid)
-    # strategy = "BFS"
-    strategy = "DFS"
+    strategy = "BFS"
+    # strategy = "DFS"
     solution, total_frontier, total_explored = game.solve(strategy)
     if solution:
         print("Solution Path:", solution)
