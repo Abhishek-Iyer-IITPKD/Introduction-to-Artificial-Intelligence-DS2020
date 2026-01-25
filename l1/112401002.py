@@ -89,16 +89,16 @@ class YantraCollector:
         """
         neighbors = []
         # North
-        if position[0]>0 and self.grid[position[0]-1][position[1]] != '#' and self.grid[position[0]-1][position[1]] != 'T' and self.grid[position[0]-1][position[1]] != '?':
+        if position[0]>0 and self.grid[position[0]-1][position[1]] != '#' and self.grid[position[0]-1][position[1]] != 'T':
             neighbors.append((position[0]-1, position[1]))
         # East
-        if position[1]<self.n-1 and self.grid[position[0]][position[1]+1] != '#' and self.grid[position[0]][position[1]+1] != 'T' and self.grid[position[0]][position[1]+1] != '?':
+        if position[1]<self.n-1 and self.grid[position[0]][position[1]+1] != '#' and self.grid[position[0]][position[1]+1] != 'T':
             neighbors.append((position[0], position[1]+1))
         # South
-        if position[0]<self.n-1 and self.grid[position[0]+1][position[1]] != '#' and self.grid[position[0]+1][position[1]] != 'T' and self.grid[position[0]+1][position[1]] != '?':
+        if position[0]<self.n-1 and self.grid[position[0]+1][position[1]] != '#' and self.grid[position[0]+1][position[1]] != 'T':
             neighbors.append((position[0]+1, position[1]))
         # West
-        if position[1]>0 and self.grid[position[0]][position[1]-1] != '#' and self.grid[position[0]][position[1]-1] != 'T' and self.grid[position[0]][position[1]-1] != '?':
+        if position[1]>0 and self.grid[position[0]][position[1]-1] != '#' and self.grid[position[0]][position[1]-1] != 'T':
             neighbors.append((position[0], position[1]-1))
         return neighbors
 
@@ -112,6 +112,7 @@ class YantraCollector:
         """
         frontier = [start]
         explored = []
+        # parents = {}
         while True:
             pos = frontier.pop(0)
             explored.append(pos)
@@ -119,6 +120,7 @@ class YantraCollector:
                 break
             for neighbor in self.get_neighbors(pos):
                 if neighbor not in explored and neighbor not in frontier:
+                    # parents[neighbor] = pos
                     frontier.append(neighbor)
             if len(frontier) == 0:
                 return None, 0, len(explored)
@@ -129,6 +131,7 @@ class YantraCollector:
                 if e in neighbors:
                     path.insert(0, e)
                     break
+            # path.insert(0, parents[path[0]])
         return path, len(frontier), len(explored)
 
     def dfs(self, start, goal):
@@ -141,6 +144,7 @@ class YantraCollector:
         """
         frontier = [start]
         explored = []
+        # parents = {}
         while True:
             pos = frontier.pop(0)
             explored.append(pos)
@@ -148,6 +152,7 @@ class YantraCollector:
                 break
             for neighbor in self.get_neighbors(pos)[::-1]:
                 if neighbor not in explored and neighbor not in frontier:
+                    # parents[neighbor] = pos
                     frontier.insert(0, neighbor)
             if len(frontier) == 0:
                 return None, 0, len(explored)
@@ -158,8 +163,8 @@ class YantraCollector:
                 if e in neighbors:
                     path.insert(0, e)
                     break
+            # path.insert(0, parents[path[0]])
         return path, len(frontier), len(explored)
-            
 
     def solve(self, strategy):
         """
@@ -174,16 +179,20 @@ class YantraCollector:
         while True:
             if self.collected_yantras == 0:
                 if strategy == "BFS":
-                    path, fLen, eLen = self.bfs(self.start, self.revealed_yantra)
+                    path, frontier_length, explored_length = self.bfs(self.start, self.revealed_yantra)
                 elif strategy == "DFS":
-                    path, fLen, eLen = self.dfs(self.start, self.revealed_yantra)
+                    path, frontier_length, explored_length = self.dfs(self.start, self.revealed_yantra)
+                else:
+                    path, frontier_length, explored_length = None, 0, 0
             else:
                 if strategy == "BFS":
-                    path, fLen, eLen = self.bfs(self.yantras[self.collected_yantras], self.revealed_yantra)
+                    path, frontier_length, explored_length = self.bfs(self.yantras[self.collected_yantras], self.revealed_yantra)
                 elif strategy == "DFS":
-                    path, fLen, eLen = self.dfs(self.yantras[self.collected_yantras], self.revealed_yantra)
-            tExplored += eLen
-            tFrontier += fLen
+                    path, frontier_length, explored_length = self.dfs(self.yantras[self.collected_yantras], self.revealed_yantra)
+                else:
+                    path, frontier_length, explored_length = None, 0, 0
+            tExplored += explored_length
+            tFrontier += frontier_length
             if path:
                 for i in range(1,len(path)):
                     tPath.append(path[i])
@@ -202,7 +211,6 @@ if __name__ == "__main__":
         ['#', '.', '.', 'T', '.'],
         ['.', '.', '.', '.', 'E']
     ]
-    
     # grid = [
     #     ['P', 'Y4', '#', '.', 'Y2'],
     #     ['.', '.', '.', '.', '.'],
