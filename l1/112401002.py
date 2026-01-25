@@ -1,7 +1,6 @@
 # Filename: l1.py
 
 from operator import le
-from turtle import st
 
 
 class YantraCollector:
@@ -88,16 +87,12 @@ class YantraCollector:
             position (tuple): The current position of the player.
         """
         neighbors = []
-        # North
         if position[0]>0 and self.grid[position[0]-1][position[1]] != '#' and self.grid[position[0]-1][position[1]] != 'T':
             neighbors.append((position[0]-1, position[1]))
-        # East
         if position[1]<self.n-1 and self.grid[position[0]][position[1]+1] != '#' and self.grid[position[0]][position[1]+1] != 'T':
             neighbors.append((position[0], position[1]+1))
-        # South
         if position[0]<self.n-1 and self.grid[position[0]+1][position[1]] != '#' and self.grid[position[0]+1][position[1]] != 'T':
             neighbors.append((position[0]+1, position[1]))
-        # West
         if position[1]>0 and self.grid[position[0]][position[1]-1] != '#' and self.grid[position[0]][position[1]-1] != 'T':
             neighbors.append((position[0], position[1]-1))
         return neighbors
@@ -173,9 +168,9 @@ class YantraCollector:
         Args:
             strategy (str): The search strategy (BFS or DFS).
         """
-        tPath = [self.start]
-        tExplored = 0
-        tFrontier = 0
+        total_path = [self.start]
+        total_explored_length = 0
+        total_frontier_length = 0
         while True:
             if self.collected_yantras == 0:
                 if strategy == "BFS":
@@ -191,17 +186,17 @@ class YantraCollector:
                     path, frontier_length, explored_length = self.dfs(self.yantras[self.collected_yantras], self.revealed_yantra)
                 else:
                     path, frontier_length, explored_length = None, 0, 0
-            tExplored += explored_length
-            tFrontier += frontier_length
+            total_explored_length += explored_length
+            total_frontier_length += frontier_length
             if path:
                 for i in range(1,len(path)):
-                    tPath.append(path[i])
+                    total_path.append(path[i])
             else:
-                return None, tFrontier, tExplored
+                return None, total_frontier_length, total_explored_length
             if self.revealed_yantra == self.exit:
                 break
             self.reveal_next_yantra_or_exit()
-        return tPath, tFrontier, tExplored
+        return total_path, total_frontier_length, total_explored_length
 
 if __name__ == "__main__":
     grid = [
