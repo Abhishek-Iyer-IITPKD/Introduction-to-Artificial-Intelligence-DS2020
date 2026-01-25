@@ -1,6 +1,7 @@
 # Filename: l1.py
 
 from operator import le
+from turtle import st
 
 
 class YantraCollector:
@@ -145,7 +146,7 @@ class YantraCollector:
             explored.append(pos)
             if pos == goal:
                 break
-            for neighbor in self.get_neighbors(pos):
+            for neighbor in self.get_neighbors(pos)[::-1]:
                 if neighbor not in explored and neighbor not in frontier:
                     frontier.insert(0, neighbor)
             if len(frontier) == 0:
@@ -167,46 +168,31 @@ class YantraCollector:
         Args:
             strategy (str): The search strategy (BFS or DFS).
         """
-        if strategy == "BFS":
-            tPath = [self.start]
-            tExplored = 0
-            tFrontier = 0
-            while True:
-                if self.collected_yantras == 0:
+        tPath = [self.start]
+        tExplored = 0
+        tFrontier = 0
+        while True:
+            if self.collected_yantras == 0:
+                if strategy == "BFS":
                     path, fLen, eLen = self.bfs(self.start, self.revealed_yantra)
-                else: 
-                    path, fLen, eLen = self.bfs(self.yantras[self.collected_yantras], self.revealed_yantra)
-                tExplored += eLen
-                tFrontier += fLen
-                if path:
-                    for i in range(1,len(path)):
-                        tPath.append(path[i])
-                else:
-                    return None, tFrontier, tExplored
-                if self.revealed_yantra == self.exit:
-                    break
-                self.reveal_next_yantra_or_exit()
-            return tPath, tFrontier, tExplored
-        if strategy == "DFS":
-            tPath = [self.start]
-            tExplored = 0
-            tFrontier = 0
-            while True:
-                if self.collected_yantras == 0:
+                elif strategy == "DFS":
                     path, fLen, eLen = self.dfs(self.start, self.revealed_yantra)
-                else: 
+            else:
+                if strategy == "BFS":
+                    path, fLen, eLen = self.bfs(self.yantras[self.collected_yantras], self.revealed_yantra)
+                elif strategy == "DFS":
                     path, fLen, eLen = self.dfs(self.yantras[self.collected_yantras], self.revealed_yantra)
-                tExplored += eLen
-                tFrontier += fLen
-                if path:
-                    for i in range(1,len(path)):
-                        tPath.append(path[i])
-                else:
-                    return None, tFrontier, tExplored
-                if self.revealed_yantra == self.exit:
-                    break
-                self.reveal_next_yantra_or_exit()
-            return tPath, tFrontier, tExplored
+            tExplored += eLen
+            tFrontier += fLen
+            if path:
+                for i in range(1,len(path)):
+                    tPath.append(path[i])
+            else:
+                return None, tFrontier, tExplored
+            if self.revealed_yantra == self.exit:
+                break
+            self.reveal_next_yantra_or_exit()
+        return tPath, tFrontier, tExplored
 
 if __name__ == "__main__":
     grid = [
@@ -226,8 +212,8 @@ if __name__ == "__main__":
     # ]
 
     game = YantraCollector(grid)
-    strategy = "BFS"
-    # strategy = "DFS"
+    # strategy = "BFS"
+    strategy = "DFS"
     solution, total_frontier, total_explored = game.solve(strategy)
     if solution:
         print("Solution Path:", solution)
