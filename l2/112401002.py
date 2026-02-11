@@ -25,7 +25,7 @@ class YantraCollector:
         self.yantras = self.find_all_yantras()
         self.revealed_yantra = self.find_position('Y1')
         ## use these variables if needed
-        # self.collected_yantras = 0
+        self.collected_yantras = 0
         # self.total_frontier_nodes = 0
         # self.total_explored_nodes = 0
         # self.total_cost = 0
@@ -108,7 +108,7 @@ class YantraCollector:
         Returns:
             bool: True if position matches revealed_yantra, False otherwise.
         """
-        pass  # TO DO 
+        return position == self.revealed_yantra
 
     def get_neighbors(self, position):
         """
@@ -122,7 +122,16 @@ class YantraCollector:
             list: A list of neighboring positions [(row, col), ...]. 
                   should include all valid neighbors in the expected order.
         """
-        pass  # TO DO 
+        neighbors = []
+        if position[0]>0 and self.grid[position[0]-1][position[1]] != '#':
+            neighbors.append((position[0]-1, position[1]))
+        if position[1]<self.n-1 and self.grid[position[0]][position[1]+1] != '#':
+            neighbors.append((position[0], position[1]+1))
+        if position[0]<self.n-1 and self.grid[position[0]+1][position[1]] != '#':
+            neighbors.append((position[0]+1, position[1]))
+        if position[1]>0 and self.grid[position[0]][position[1]-1] != '#':
+            neighbors.append((position[0], position[1]-1))
+        return neighbors
 
     def ucs(self, start, goal):
         """
@@ -137,7 +146,39 @@ class YantraCollector:
                    - explored_count: Number of nodes in the explored list at the time of exiting the function.
                    - path_cost: Total cost of the path.
         """
-        pass  # TO DO 
+        frontier = [start]
+        explored = []
+        parents = {}
+        cost = {start:0}
+        while True:
+            pos = frontier.pop(0)
+            explored.append(pos)
+            if pos == goal:
+                break
+            for neighbor in self.get_neighbors(pos):
+                if neighbor not in explored and neighbor not in frontier:
+                    parents[neighbor] = pos
+                    cost[neighbor] = cost[parents[neighbor]] + self.cost_map[neighbor]
+                    if frontier:
+                        for i in range(len(frontier)):
+                            if cost[frontier[i]] > cost[neighbor]:
+                                frontier.insert(i, neighbor)
+                                break
+                            else:
+                                frontier.append(neighbor)
+                    else:
+                        frontier.append(neighbor)
+            if len(frontier) == 0:
+                return None, 0, len(explored), 0
+        path = [goal]
+        while path[0] != start:
+            # neighbors = self.get_neighbors(path[0])
+            # for e in explored:
+            #     if e in neighbors:
+            #         path.insert(0, e)
+            #         break
+            path.insert(0, parents[path[0]])
+        return path, len(frontier), len(explored), cost[goal]
 
     def heuristic(self, position, goal):
         """
@@ -149,7 +190,8 @@ class YantraCollector:
         Returns:
             int: The estimated cost to the goal.
         """
-        pass  # TO DO 
+        return abs(goal[0]-position[0]) + abs(goal[1]-position[1]) # For Testing (Manhattan Distance)
+        
 
     def gbfs(self, start, goal):
         """
@@ -162,7 +204,40 @@ class YantraCollector:
                    - explored_count: Number of nodes in the explored list at the time of exiting the function.
                    - path_cost: Total cost of the path.
         """
-        pass  # TO DO 
+        frontier = [start]
+        explored = []
+        parents = {}
+        cost = {start:0}
+        while True:
+            pos = frontier.pop(0)
+            explored.append(pos)
+            if pos == goal:
+                break
+            for neighbor in self.get_neighbors(pos):
+                if neighbor not in explored and neighbor not in frontier:
+                    parents[neighbor] = pos
+                    cost[neighbor] = cost[parents[neighbor]] + self.cost_map[neighbor]
+                    
+                    if frontier:
+                        for i in range(len(frontier)):
+                            if self.heuristic(frontier[i], goal) > self.heuristic(neighbor, goal):
+                                frontier.insert(i, neighbor)
+                                break
+                            else:
+                                frontier.append(neighbor)
+                    else:
+                        frontier.append(neighbor)
+            if len(frontier) == 0:
+                return None, 0, len(explored), 0
+        path = [goal]
+        while path[0] != start:
+            # neighbors = self.get_neighbors(path[0])
+            # for e in explored:
+            #     if e in neighbors:
+            #         path.insert(0, e)
+            #         break
+            path.insert(0, parents[path[0]])
+        return path, len(frontier), len(explored), cost[goal]
 
     def a_star(self, start, goal):
         """
@@ -175,7 +250,40 @@ class YantraCollector:
                    - explored_count: Number of nodes in the explored list at the time of exiting the function.
                    - path_cost: Total cost of the path.
         """
-        pass  # TO DO 
+        frontier = [start]
+        explored = []
+        parents = {}
+        cost = {start:0}
+        while True:
+            pos = frontier.pop(0)
+            explored.append(pos)
+            if pos == goal:
+                break
+            for neighbor in self.get_neighbors(pos):
+                if neighbor not in explored and neighbor not in frontier:
+                    parents[neighbor] = pos
+                    cost[neighbor] = cost[parents[neighbor]] + self.cost_map[neighbor]
+                    
+                    if frontier:
+                        for i in range(len(frontier)):
+                            if (cost[frontier[i]] + self.heuristic(frontier[i], goal)) > (cost[neighbor] + self.heuristic(neighbor, goal)):
+                                frontier.insert(i, neighbor)
+                                break
+                            else:
+                                frontier.append(neighbor)
+                    else:
+                        frontier.append(neighbor)
+            if len(frontier) == 0:
+                return None, 0, len(explored), 0
+        path = [goal]
+        while path[0] != start:
+            # neighbors = self.get_neighbors(path[0])
+            # for e in explored:
+            #     if e in neighbors:
+            #         path.insert(0, e)
+            #         break
+            path.insert(0, parents[path[0]])
+        return path, len(frontier), len(explored), cost[goal]
 
     def solve(self, strategy):
         """
@@ -191,19 +299,55 @@ class YantraCollector:
                    - total_explored_nodes: Sum of explored_count across all searches.
                    - total_cost: Total cost of the path.
         """
-        pass  # TO DO 
+        total_path = [self.start]
+        total_frontier_length = 0
+        total_explored_length = 0
+        total_cost = 0
+        while True:
+            if self.collected_yantras == 0:
+                if strategy == "UCS":
+                    path, frontier_length, explored_length, cost = self.ucs(self.start, self.revealed_yantra)
+                elif strategy == "GBFS":
+                    path, frontier_length, explored_length, cost = self.gbfs(self.start, self.revealed_yantra)
+                elif strategy == "A*":
+                    path, frontier_length, explored_length, cost = self.a_star(self.start, self.revealed_yantra)
+                else:
+                    path, frontier_length, explored_length, cost = None, 0, 0, 0
+            else:
+                if strategy == "UCS":
+                    path, frontier_length, explored_length, cost = self.ucs(self.yantras[self.collected_yantras], self.revealed_yantra)
+                elif strategy == "GBFS":
+                    path, frontier_length, explored_length, cost = self.gbfs(self.yantras[self.collected_yantras], self.revealed_yantra)
+                elif strategy == "A*":
+                    path, frontier_length, explored_length, cost = self.a_star(self.yantras[self.collected_yantras], self.revealed_yantra)
+                else:
+                    path, frontier_length, explored_length, cost = None, 0, 0, 0
+            total_explored_length += explored_length
+            total_frontier_length += frontier_length
+            total_cost += cost
+            if path:
+                for i in range(1,len(path)):
+                    total_path.append(path[i])
+            else:
+                return None
+            if self.revealed_yantra == self.exit:
+                break
+            self.reveal_next_yantra_or_exit()
+        return total_path, total_frontier_length, total_explored_length, total_cost
 
 if __name__ == "__main__":
     grid = [
-        ['P', 2, '#', 5, 'Y2'],
-        ['T', 2, 3, '#', 1],
-        [0, 7, 'Y1', 4, 2],
-        ['#', 'T', 2, 1, 3],
-        [1, 3, 0, 2, 'E']
+        ['P', 2  , '#' , 5  , 'Y2'],
+        ['T', 2  , 3   , '#', 1   ],
+        [0  , 7  , 'Y1', 4  , 2   ],
+        ['#', 'T', 2   , 1  , 3   ],
+        [1  , 3  , 0   , 2  , 'E' ]
     ]
 
     game = YantraCollector(grid)
-    strategy = "A*"  # or "UCS" or "GBFS"
+    # strategy = "UCS"
+    # strategy = "GBFS"
+    strategy = "A*"
     result = game.solve(strategy)
     
     if result:
