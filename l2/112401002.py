@@ -190,7 +190,25 @@ class YantraCollector:
         Returns:
             int: The estimated cost to the goal.
         """
-        return abs(goal[0]-position[0]) + abs(goal[1]-position[1]) # For Testing (Manhattan Distance)
+        # return abs(goal[0]-position[0]) + abs(goal[1]-position[1]) # For Testing (Manhattan Distance)
+        cost = 0
+        x_dist = goal[0] - position[0]
+        y_dist = goal[1] - position[1]
+        for i in range(1, abs(x_dist)+1):
+            if(self.grid[position[0] + int((x_dist/abs(x_dist)) * i)][position[1]] == '#'):
+                cost += 0
+            elif(self.grid[position[0] + int((x_dist/abs(x_dist)) * i)][position[1]] == 'T'):
+                cost += 0
+            else:
+                cost += self.cost_map[position[0] + int((x_dist/abs(x_dist)) * i), position[1]]
+        for j in range(abs(goal[1]-position[1])):
+            if(self.grid[position[0]][position[1]+int((y_dist/abs(y_dist)) * j)] == '#'):
+                cost += 0
+            elif(self.grid[position[0]][position[1]+int((y_dist/abs(y_dist)) * j)] == 'T'):
+                cost += 0
+            else:
+                cost += self.cost_map[position[0], position[1] + int((y_dist/abs(y_dist)) * j)]
+        return cost
         
 
     def gbfs(self, start, goal):
@@ -254,6 +272,7 @@ class YantraCollector:
         explored = []
         parents = {}
         cost = {start:0}
+        heuristics = {start:self.heuristic(start, goal)}
         while True:
             pos = frontier.pop(0)
             explored.append(pos)
@@ -263,10 +282,10 @@ class YantraCollector:
                 if neighbor not in explored and neighbor not in frontier:
                     parents[neighbor] = pos
                     cost[neighbor] = cost[parents[neighbor]] + self.cost_map[neighbor]
-                    
+                    heuristics[neighbor] = self.heuristic(neighbor, goal)
                     if frontier:
                         for i in range(len(frontier)):
-                            if (cost[frontier[i]] + self.heuristic(frontier[i], goal)) > (cost[neighbor] + self.heuristic(neighbor, goal)):
+                            if (cost[frontier[i]] + heuristics[frontier[i]]) > (cost[neighbor] + heuristics[neighbor]):
                                 frontier.insert(i, neighbor)
                                 break
                             else:
