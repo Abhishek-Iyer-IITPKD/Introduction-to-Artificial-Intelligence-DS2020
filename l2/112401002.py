@@ -156,18 +156,16 @@ class YantraCollector:
             if pos == goal:
                 break
             for neighbor in self.get_neighbors(pos):
-                if neighbor not in explored and neighbor not in frontier:
+                if neighbor in cost:
+                    if cost[pos]+self.cost_map[neighbor] < cost[neighbor]:
+                        cost[neighbor] = cost[pos]+self.cost_map[neighbor]
+                        parents[neighbor] = pos
+                else:
+                    cost[neighbor] = cost[pos]+self.cost_map[neighbor]
                     parents[neighbor] = pos
-                    cost[neighbor] = cost[parents[neighbor]] + self.cost_map[neighbor]
-                    if frontier:
-                        for i in range(len(frontier)):
-                            if cost[frontier[i]] > cost[neighbor]:
-                                frontier.insert(i, neighbor)
-                                break
-                            else:
-                                frontier.append(neighbor)
-                    else:
-                        frontier.append(neighbor)
+                if neighbor not in explored and neighbor not in frontier:
+                    frontier.append(neighbor)
+            frontier.sort(key=lambda x: cost[x])
             if len(frontier) == 0:
                 return None, 0, len(explored), 0
         path = [goal]
@@ -191,24 +189,27 @@ class YantraCollector:
             int: The estimated cost to the goal.
         """
         # return abs(goal[0]-position[0]) + abs(goal[1]-position[1]) # For Testing (Manhattan Distance)
-        cost = 0
-        x_dist = goal[0] - position[0]
-        y_dist = goal[1] - position[1]
-        for i in range(1, abs(x_dist)+1):
-            if(self.grid[position[0] + int((x_dist/abs(x_dist)) * i)][position[1]] == '#'):
-                cost += 0
-            elif(self.grid[position[0] + int((x_dist/abs(x_dist)) * i)][position[1]] == 'T'):
-                cost += 0
-            else:
-                cost += self.cost_map[position[0] + int((x_dist/abs(x_dist)) * i), position[1]]
-        for j in range(abs(goal[1]-position[1])):
-            if(self.grid[position[0]][position[1]+int((y_dist/abs(y_dist)) * j)] == '#'):
-                cost += 0
-            elif(self.grid[position[0]][position[1]+int((y_dist/abs(y_dist)) * j)] == 'T'):
-                cost += 0
-            else:
-                cost += self.cost_map[position[0], position[1] + int((y_dist/abs(y_dist)) * j)]
-        return cost
+        
+        # cost = 0
+        # x_dist = goal[0] - position[0]
+        # y_dist = goal[1] - position[1]
+        # for i in range(1, abs(x_dist)+1):
+        #     if(self.grid[position[0] + int((x_dist/abs(x_dist)) * i)][position[1]] == '#'):
+        #         cost += 0
+        #     elif(self.grid[position[0] + int((x_dist/abs(x_dist)) * i)][position[1]] == 'T'):
+        #         cost += 0
+        #     else:
+        #         cost += self.cost_map[position[0] + int((x_dist/abs(x_dist)) * i), position[1]]
+        # for j in range(abs(goal[1]-position[1])):
+        #     if(self.grid[position[0]][position[1]+int((y_dist/abs(y_dist)) * j)] == '#'):
+        #         cost += 0
+        #     elif(self.grid[position[0]][position[1]+int((y_dist/abs(y_dist)) * j)] == 'T'):
+        #         cost += 0
+        #     else:
+        #         cost += self.cost_map[position[0], position[1] + int((y_dist/abs(y_dist)) * j)]
+        # return cost
+        
+        return 2^abs(goal[0]-position[0])*3^abs(goal[1]-position[1])
         
 
     def gbfs(self, start, goal):
@@ -226,25 +227,24 @@ class YantraCollector:
         explored = []
         parents = {}
         cost = {start:0}
+        heuristics = {start:self.heuristic(start, goal)}
         while True:
             pos = frontier.pop(0)
             explored.append(pos)
             if pos == goal:
                 break
             for neighbor in self.get_neighbors(pos):
-                if neighbor not in explored and neighbor not in frontier:
+                if neighbor in cost:
+                    if cost[pos]+self.cost_map[neighbor] < cost[neighbor]:
+                        cost[neighbor] = cost[pos]+self.cost_map[neighbor]
+                        parents[neighbor] = pos
+                else:
+                    cost[neighbor] = cost[pos]+self.cost_map[neighbor]
                     parents[neighbor] = pos
-                    cost[neighbor] = cost[parents[neighbor]] + self.cost_map[neighbor]
-                    
-                    if frontier:
-                        for i in range(len(frontier)):
-                            if self.heuristic(frontier[i], goal) > self.heuristic(neighbor, goal):
-                                frontier.insert(i, neighbor)
-                                break
-                            else:
-                                frontier.append(neighbor)
-                    else:
-                        frontier.append(neighbor)
+                if neighbor not in explored and neighbor not in frontier:
+                    heuristics[neighbor] = self.heuristic(neighbor, goal)
+                    frontier.append(neighbor)
+            frontier.sort(key=lambda x: heuristics[x])
             if len(frontier) == 0:
                 return None, 0, len(explored), 0
         path = [goal]
@@ -279,19 +279,17 @@ class YantraCollector:
             if pos == goal:
                 break
             for neighbor in self.get_neighbors(pos):
-                if neighbor not in explored and neighbor not in frontier:
+                if neighbor in cost:
+                    if cost[pos]+self.cost_map[neighbor] < cost[neighbor]:
+                        cost[neighbor] = cost[pos]+self.cost_map[neighbor]
+                        parents[neighbor] = pos
+                else:
+                    cost[neighbor] = cost[pos]+self.cost_map[neighbor]
                     parents[neighbor] = pos
-                    cost[neighbor] = cost[parents[neighbor]] + self.cost_map[neighbor]
+                if neighbor not in explored and neighbor not in frontier:
                     heuristics[neighbor] = self.heuristic(neighbor, goal)
-                    if frontier:
-                        for i in range(len(frontier)):
-                            if (cost[frontier[i]] + heuristics[frontier[i]]) > (cost[neighbor] + heuristics[neighbor]):
-                                frontier.insert(i, neighbor)
-                                break
-                            else:
-                                frontier.append(neighbor)
-                    else:
-                        frontier.append(neighbor)
+                    frontier.append(neighbor)
+            frontier.sort(key=lambda x: cost[x] + heuristics[x])
             if len(frontier) == 0:
                 return None, 0, len(explored), 0
         path = [goal]
@@ -365,8 +363,8 @@ if __name__ == "__main__":
 
     game = YantraCollector(grid)
     # strategy = "UCS"
-    # strategy = "GBFS"
-    strategy = "A*"
+    strategy = "GBFS"
+    # strategy = "A*"
     result = game.solve(strategy)
     
     if result:
