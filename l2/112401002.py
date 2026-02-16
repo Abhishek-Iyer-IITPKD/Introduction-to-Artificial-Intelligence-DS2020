@@ -170,11 +170,6 @@ class YantraCollector:
                 return None, 0, len(explored), 0
         path = [goal]
         while path[0] != start:
-            # neighbors = self.get_neighbors(path[0])
-            # for e in explored:
-            #     if e in neighbors:
-            #         path.insert(0, e)
-            #         break
             path.insert(0, parents[path[0]])
         return path, len(frontier), len(explored), cost[goal]
 
@@ -249,11 +244,6 @@ class YantraCollector:
                 return None, 0, len(explored), 0
         path = [goal]
         while path[0] != start:
-            # neighbors = self.get_neighbors(path[0])
-            # for e in explored:
-            #     if e in neighbors:
-            #         path.insert(0, e)
-            #         break
             path.insert(0, parents[path[0]])
         return path, len(frontier), len(explored), cost[goal]
 
@@ -294,11 +284,6 @@ class YantraCollector:
                 return None, 0, len(explored), 0
         path = [goal]
         while path[0] != start:
-            # neighbors = self.get_neighbors(path[0])
-            # for e in explored:
-            #     if e in neighbors:
-            #         path.insert(0, e)
-            #         break
             path.insert(0, parents[path[0]])
         return path, len(frontier), len(explored), cost[goal]
 
