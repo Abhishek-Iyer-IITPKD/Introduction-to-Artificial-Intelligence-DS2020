@@ -204,6 +204,8 @@ class YantraCollector:
         #         cost += self.cost_map[position[0], position[1] + int((y_dist/abs(y_dist)) * j)]
         # return cost
         
+        if self.grid[position[0]][position[1]] == 'T':
+            return 99999
         return 2^abs(goal[0]-position[0])*3^abs(goal[1]-position[1])
         
 
@@ -348,8 +350,8 @@ if __name__ == "__main__":
 
     game = YantraCollector(grid)
     # strategy = "UCS"
-    strategy = "GBFS"
-    # strategy = "A*"
+    # strategy = "GBFS"
+    strategy = "A*"
     result = game.solve(strategy)
     
     if result:
