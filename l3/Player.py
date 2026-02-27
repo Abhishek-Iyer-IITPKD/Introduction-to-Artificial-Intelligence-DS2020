@@ -21,7 +21,7 @@ class AIPlayer:
         if not valid_cols:
             return self.evaluation_function(board), 0
         
-        max_val = -10000
+        max_val = float('-inf')
         for move in valid_cols:
             new = np.copy(board)
             i = 0
@@ -33,8 +33,8 @@ class AIPlayer:
             if val > max_val:
                 max_val = val
                 max_move = move
-            alpha = max(alpha, max_val)
-            if beta <= alpha:
+                alpha = max(alpha, max_val)
+            if beta <= val:
                 break
         return max_val, max_move
     
@@ -50,7 +50,13 @@ class AIPlayer:
         if not valid_cols:
             return self.evaluation_function(board), 0
         
-        min_val = 10000
+        if self.game_completed(board, self.player_number):
+            return 1000, 0
+        elif self.game_completed(board, 3-self.player_number):
+            return -1000, 0
+        
+        
+        min_val = float('inf')
         for move in valid_cols:
             new = np.copy(board)
             for i in range(new.shape[0]-1):
@@ -61,8 +67,8 @@ class AIPlayer:
             if val < min_val:
                 min_val = val
                 min_move = move
-            beta = min(beta, min_val)
-            if beta <= alpha:
+                beta = min(beta, min_val)
+            if val <= alpha:
                 break
         return min_val, min_move
     
@@ -86,8 +92,8 @@ class AIPlayer:
         RETURNS:
         The 0 based index of the column that represents the next move
         """
-        alpha = -10000
-        beta = 10000
+        alpha = float('-inf')
+        beta = float('inf')
         
         _, best_move =  self.max_value(board, 0, alpha, beta)
 
@@ -105,7 +111,7 @@ class AIPlayer:
         if not valid_cols:
             return self.evaluation_function(board), 0
         
-        max_val = -10000
+        max_val = float('-inf')
         for move in valid_cols:
             new = np.copy(board)
             i = 0
@@ -162,7 +168,37 @@ class AIPlayer:
 
         return best_move
 
+    # def game_completed(self, board, player_num):
+    #     player_win_str = '{0}{0}{0}{0}'.format(player_num)
+    #     to_str = lambda a: ''.join(a.astype(str))
 
+    #     def check_horizontal(b):
+    #         for row in b:
+    #             if player_win_str in to_str(row):
+    #                 return True
+    #         return False
+
+    #     def check_verticle(b):
+    #         return check_horizontal(b.T)
+
+    #     def check_diagonal(b):
+    #         for op in [None, np.fliplr]:
+    #             op_board = op(b) if op else b
+                
+    #             root_diag = np.diagonal(op_board, offset=0).astype(int)
+    #             if player_win_str in to_str(root_diag):
+    #                 return True
+
+    #             for i in range(1, b.shape[1]-3):
+    #                 for offset in [i, -i]:
+    #                     diag = np.diagonal(op_board, offset=offset)
+    #                     diag = to_str(diag.astype(int))
+    #                     if player_win_str in diag:
+    #                         return True
+        
+    #     return (check_horizontal(board) or
+    #             check_verticle(board) or
+    #             check_diagonal(board))
 
 
     def evaluation_function(self, board):
@@ -183,8 +219,25 @@ class AIPlayer:
         RETURNS:
         The utility value for the current board
         """
-        
-        return 0
+        # if self.game_completed(board, self.player_number):
+        #     return 1000
+        # elif self.game_completed(board, 3-self.player_number):
+        #     return -1000
+        my_score = 0
+        opp_score = 0
+        for r in range(board.shape[0]-3):
+            for c in range(board.shape[1]-3):
+                if 3-self.player_number not in board[r:r+3, c]:
+                    count = board[r:r+3, c].count(3-self.player_number)
+                    if count == 4:
+                        return 1000
+                    my_score += 0.5 if count == 1 else 4 if count == 2 else 100 if count == 3 else 0
+                if self.player_number not in board[r:r+3, c]:
+                    count = board[r:r+3, c].count(3-self.player_number)
+                    if count == 4:
+                        return -1000
+                    opp_score += 0.5 if count == 1 else 4 if count == 2 else 100 if count == 3 else 0
+        return my_score - opp_score
 
 
 class RandomPlayer:
