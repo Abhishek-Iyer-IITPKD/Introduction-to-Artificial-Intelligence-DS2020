@@ -136,8 +136,7 @@ class AIPlayer:
         RETURNS:
         The utility value for the current board
         """
-       
-       
+        
         return 0
 
 
