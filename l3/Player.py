@@ -1,6 +1,6 @@
 import numpy as np
 
-MAX_DEPTH = 10
+MAX_DEPTH = 5
 EXPECT_MAX_DEPTH = 2
 
 class AIPlayer:
@@ -71,6 +71,40 @@ class AIPlayer:
             if val <= alpha:
                 break
         return min_val, min_move
+    
+    def game_completed(self, board, player_num):
+        player_win_str = '{0}{0}{0}{0}'.format(player_num)
+        to_str = lambda a: ''.join(a.astype(str))
+
+        def check_horizontal(b):
+            for row in b:
+                if player_win_str in to_str(row):
+                    return True
+            return False
+
+        def check_vertical(b):
+            return check_horizontal(b.T)
+
+        def check_diagonal(b):
+            for op in [None, np.fliplr]:
+                op_board = op(b) if op else b
+                
+                root_diag = np.diagonal(op_board, offset=0).astype(int)
+                if player_win_str in to_str(root_diag):
+                    return True
+
+                for i in range(1, b.shape[1]-3):
+                    for offset in [i, -i]:
+                        diag = np.diagonal(op_board, offset=offset)
+                        diag = to_str(diag.astype(int))
+                        if player_win_str in diag:
+                            return True
+
+            return False
+
+        return (check_horizontal(board) or
+                check_vertical(board) or
+                check_diagonal(board))
     
     def get_alpha_beta_move(self, board):
         """
@@ -168,38 +202,35 @@ class AIPlayer:
 
         return best_move
 
-    # def game_completed(self, board, player_num):
-    #     player_win_str = '{0}{0}{0}{0}'.format(player_num)
-    #     to_str = lambda a: ''.join(a.astype(str))
+    def eval_window(self, window):
+        score = 0
+        own_scores = {0:0.0, 1:5, 2:30.0, 3:200.0}
+        opp_scores = {0:0.0, 1:5, 2:20.0, 3:400.0}
+        my_count = 0
+        opp_count = 0
+        empty_count = 0
+        for cell in window:
+            if cell == self.player_number: my_count += 1
+            elif cell == 3-self.player_number: opp_count += 1
+            else: empty_count += 1
 
-    #     def check_horizontal(b):
-    #         for row in b:
-    #             if player_win_str in to_str(row):
-    #                 return True
-    #         return False
+        # My (MAX) Scoring
+        if my_count == 3 and empty_count == 1:
+            score += own_scores[3]
+        elif my_count == 2 and empty_count == 2:
+            score += own_scores[2]
+        elif my_count == 1 and empty_count == 3:
+            score += own_scores[1]
 
-    #     def check_verticle(b):
-    #         return check_horizontal(b.T)
+        # Opp (MIN) Scoring
+        if opp_count == 3 and empty_count == 1:
+            score -= opp_scores[3]
+        elif opp_count == 2 and empty_count == 2:
+            score -= opp_scores[2]
+        elif opp_count == 1 and empty_count == 3:
+            score -= opp_scores[1]
 
-    #     def check_diagonal(b):
-    #         for op in [None, np.fliplr]:
-    #             op_board = op(b) if op else b
-                
-    #             root_diag = np.diagonal(op_board, offset=0).astype(int)
-    #             if player_win_str in to_str(root_diag):
-    #                 return True
-
-    #             for i in range(1, b.shape[1]-3):
-    #                 for offset in [i, -i]:
-    #                     diag = np.diagonal(op_board, offset=offset)
-    #                     diag = to_str(diag.astype(int))
-    #                     if player_win_str in diag:
-    #                         return True
-        
-    #     return (check_horizontal(board) or
-    #             check_verticle(board) or
-    #             check_diagonal(board))
-
+        return score
 
     def evaluation_function(self, board):
         """
@@ -219,25 +250,42 @@ class AIPlayer:
         RETURNS:
         The utility value for the current board
         """
-        # if self.game_completed(board, self.player_number):
-        #     return 1000
-        # elif self.game_completed(board, 3-self.player_number):
-        #     return -1000
-        my_score = 0
-        opp_score = 0
-        for r in range(board.shape[0]-3):
-            for c in range(board.shape[1]-3):
-                if 3-self.player_number not in board[r:r+3, c]:
-                    count = board[r:r+3, c].count(3-self.player_number)
-                    if count == 4:
-                        return 1000
-                    my_score += 0.5 if count == 1 else 4 if count == 2 else 100 if count == 3 else 0
-                if self.player_number not in board[r:r+3, c]:
-                    count = board[r:r+3, c].count(3-self.player_number)
-                    if count == 4:
-                        return -1000
-                    opp_score += 0.5 if count == 1 else 4 if count == 2 else 100 if count == 3 else 0
-        return my_score - opp_score
+        if self.game_completed(board, self.player_number):
+            return 1000
+        elif self.game_completed(board, 3-self.player_number):
+            return -1000
+        
+        rows, cols = board.shape
+
+        score = 0
+
+        # center_col = board[:, int(cols/2)]
+        # score += (np.count_nonzero(center_col == 1) * 3)
+        # score -= (np.count_nonzero(center_col == 2) * 3)
+
+        # Horizontal
+        for r in range(rows):
+            row_arr = board[r, :]
+            for c in range(cols - 3):
+                score+=self.eval_window(row_arr[c:c+4])
+
+        # Vertical
+        for c in range(cols):
+            col_array = board[:, c]
+            for r in range(rows - 3):
+                score+=self.eval_window(col_array[r:r+4])
+
+        # Diagonal down-right
+        for r in range(rows - 3):
+            for c in range(cols - 3):
+                score+=self.eval_window([board[r+i, c+i] for i in range(4)])
+
+        # Diagonal down-left
+        for r in range(rows - 3):
+            for c in range(3, cols):
+                score+=self.eval_window([board[r+i, c-i] for i in range(4)])
+
+        return score
 
 
 class RandomPlayer:
