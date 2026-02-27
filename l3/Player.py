@@ -1,11 +1,70 @@
 import numpy as np
 
+max_depth = 10
+
 class AIPlayer:
     def __init__(self, player_number):
         self.player_number = player_number
         self.type = 'ai'
         self.player_string = 'Player {}:ai'.format(player_number)
 
+    def max_value(self, board, depth, alpha, beta):
+        if(depth == max_depth):
+            return self.evaluation_function(board), 0
+        
+        valid_cols = []
+        for col in range(board.shape[1]):
+            if 0 in board[:,col]:
+                valid_cols.append(col)
+        
+        if not valid_cols:
+            return self.evaluation_function(board), 0
+        
+        max_val = -10000
+        for move in valid_cols:
+            new = np.copy(board)
+            i = 0
+            for i in range(new.shape[0]-1):
+                if new[i+1, move] != 0:
+                    break
+            new[i, move] = self.player_number
+            val, _ = self.min_value(new, depth+1, alpha, beta)
+            if val > max_val:
+                max_val = val
+                max_move = move
+            alpha = max(alpha, max_val)
+            if beta <= alpha:
+                break
+        return max_val, max_move
+    
+    def min_value(self, board, depth, alpha, beta):
+        if(depth == max_depth):
+            return self.evaluation_function(board), 0
+        
+        valid_cols = []
+        for col in range(board.shape[1]):
+            if 0 in board[:,col]:
+                valid_cols.append(col)
+        
+        if not valid_cols:
+            return self.evaluation_function(board), 0
+        
+        min_val = 10000
+        for move in valid_cols:
+            new = np.copy(board)
+            for i in range(new.shape[0]-1):
+                if new[i+1, move] != 0:
+                    break
+            new[i, move] = 3-self.player_number
+            val, _ = self.max_value(new, depth+1, alpha, beta)
+            if val < min_val:
+                min_val = val
+                min_move = move
+            beta = min(beta, min_val)
+            if beta <= alpha:
+                break
+        return min_val, min_move
+    
     def get_alpha_beta_move(self, board):
         """
         Given the current state of the board, return the next move based on
@@ -26,8 +85,12 @@ class AIPlayer:
         RETURNS:
         The 0 based index of the column that represents the next move
         """
+        alpha = -10000
+        beta = 10000
         
-        raise NotImplementedError('Whoops I don\'t know what to do')
+        _, best_move =  self.max_value(board, 0, alpha, beta)
+
+        return best_move
 
     def get_expectimax_move(self, board):
         """
