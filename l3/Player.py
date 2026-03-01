@@ -8,103 +8,131 @@ class AIPlayer:
         self.player_number = player_number
         self.type = 'ai'
         self.player_string = 'Player {}:ai'.format(player_number)
-
-    def max_value(self, board, depth, alpha, beta):
-        if(depth == MAX_DEPTH):
-            return self.evaluation_function(board), 0
+    
+    def is_terminal(self, board, player_num):
+        """Helper function to check whether a game has reached terminal state"""
+        rows, cols = board.shape
         
+        # Horizontal
+        for r in range(rows):
+            for c in range(cols - 3):
+                if (board[r, c] == player_num and board[r, c+1] == player_num and 
+                    board[r, c+2] == player_num and board[r, c+3] == player_num):
+                    return True
+                    
+        # Vertical
+        for c in range(cols):
+            for r in range(rows - 3):
+                if (board[r, c] == player_num and board[r+1, c] == player_num and 
+                    board[r+2, c] == player_num and board[r+3, c] == player_num):
+                    return True
+                    
+        # Diagonal down-right
+        for r in range(rows - 3):
+            for c in range(cols - 3):
+                if (board[r, c] == player_num and board[r+1, c+1] == player_num and 
+                    board[r+2, c+2] == player_num and board[r+3, c+3] == player_num):
+                    return True
+                    
+        # Diagonal down-left
+        for r in range(rows - 3):
+            for c in range(3, cols):
+                if (board[r, c] == player_num and board[r+1, c-1] == player_num and 
+                    board[r+2, c-2] == player_num and board[r+3, c-3] == player_num):
+                    return True
+                    
+        return False
+    
+    def get_valid_cols(self, board):
+        """Helper function to get the valid columns (non-filled)"""
+        cols = board.shape[1]
+        center = cols // 2
+        
+        # Order the available colummns like [3, 2, 4, 1, 5, 0, 6]
+        ordered_range = [center]
+        for i in range(1, center + 1):
+            if center - i >= 0:
+                ordered_range.append(center - i)
+            if center + i < cols:
+                ordered_range.append(center + i)
+
         valid_cols = []
-        for col in range(board.shape[1]):
+        for col in ordered_range:
             if 0 in board[:,col]:
                 valid_cols.append(col)
-        
-        if not valid_cols:
+        return valid_cols
+    
+    def get_next_open_row(self, board, col, player_num):
+        """Helper Function to get the next available row for a particular column"""
+        for r in range(board.shape[0]-1, -1, -1):
+            if board[r, col] == 0:
+                board[r, col] = player_num
+                return r
+
+        return -1
+            
+    def max_value(self, board, depth, alpha, beta):
+        # If a terminal state has been reached, then return values such that they are ranked on the basis of their depths
+        if self.is_terminal(board, self.player_number):
+            return 10000 - depth, 0
+        elif self.is_terminal(board, 3-self.player_number):
+            return -10000 - depth, 0
+
+        valid_cols = self.get_valid_cols(board)
+        # If there are no more valid moves left or MAX_DEPTH has been reached, call the evaluation function
+        if not valid_cols or depth == MAX_DEPTH:
             return self.evaluation_function(board), 0
         
         max_val = float('-inf')
+        max_move = -1
+
         for move in valid_cols:
-            new = np.copy(board)
-            i = 0
-            for i in range(new.shape[0]-1):
-                if new[i+1, move] != 0:
-                    break
-            new[i, move] = self.player_number
-            val, _ = self.min_value(new, depth+1, alpha, beta)
+            row = self.get_next_open_row(board, move, self.player_number)
+
+            val, _ = self.min_value(board, depth+1, alpha, beta)
+            
+            board[row, move] = 0
+            
             if val > max_val:
                 max_val = val
                 max_move = move
                 alpha = max(alpha, max_val)
+
             if beta <= val:
                 break
+
         return max_val, max_move
     
     def min_value(self, board, depth, alpha, beta):
-        if(depth == MAX_DEPTH):
+        # If a terminal state has been reached, then return values such that they are ranked on the basis of their depths
+        if self.is_terminal(board, self.player_number):
+            return 10000 - depth, 0
+        elif self.is_terminal(board, 3-self.player_number):
+            return -10000 - depth, 0
+
+        valid_cols = self.get_valid_cols(board)
+        # If there are no more valid moves left or MAX_DEPTH has been reached, call the evaluation function
+        if not valid_cols or depth == MAX_DEPTH:
             return self.evaluation_function(board), 0
-        
-        valid_cols = []
-        for col in range(board.shape[1]):
-            if 0 in board[:,col]:
-                valid_cols.append(col)
-        
-        if not valid_cols:
-            return self.evaluation_function(board), 0
-        
-        if self.game_completed(board, self.player_number):
-            return 1000, 0
-        elif self.game_completed(board, 3-self.player_number):
-            return -1000, 0
-        
-        
+
         min_val = float('inf')
+        min_move = -1
+
         for move in valid_cols:
-            new = np.copy(board)
-            for i in range(new.shape[0]-1):
-                if new[i+1, move] != 0:
-                    break
-            new[i, move] = 3-self.player_number
-            val, _ = self.max_value(new, depth+1, alpha, beta)
+            row = self.get_next_open_row(board, move, 3-self.player_number)
+
+            val, _ = self.max_value(board, depth+1, alpha, beta)
+
+            board[row, move] = 0
             if val < min_val:
                 min_val = val
                 min_move = move
                 beta = min(beta, min_val)
+
             if val <= alpha:
                 break
+
         return min_val, min_move
-    
-    def game_completed(self, board, player_num):
-        player_win_str = '{0}{0}{0}{0}'.format(player_num)
-        to_str = lambda a: ''.join(a.astype(str))
-
-        def check_horizontal(b):
-            for row in b:
-                if player_win_str in to_str(row):
-                    return True
-            return False
-
-        def check_vertical(b):
-            return check_horizontal(b.T)
-
-        def check_diagonal(b):
-            for op in [None, np.fliplr]:
-                op_board = op(b) if op else b
-                
-                root_diag = np.diagonal(op_board, offset=0).astype(int)
-                if player_win_str in to_str(root_diag):
-                    return True
-
-                for i in range(1, b.shape[1]-3):
-                    for offset in [i, -i]:
-                        diag = np.diagonal(op_board, offset=offset)
-                        diag = to_str(diag.astype(int))
-                        if player_win_str in diag:
-                            return True
-
-            return False
-
-        return (check_horizontal(board) or
-                check_vertical(board) or
-                check_diagonal(board))
     
     def get_alpha_beta_move(self, board):
         """
@@ -126,49 +154,38 @@ class AIPlayer:
         RETURNS:
         The 0 based index of the column that represents the next move
         """
-        alpha = float('-inf')
-        beta = float('inf')
-        
-        _, best_move =  self.max_value(board, 0, alpha, beta)
+        _, best_move = self.max_value(board, depth = 0, alpha = float('-inf'), beta = float('inf'))
 
         return best_move
 
     def expectimax_value(self, board, depth):
-        if(depth == EXPECT_MAX_DEPTH):
-            return self.evaluation_function(board), 0
-        
-        valid_cols = []
-        for col in range(board.shape[1]):
-            if 0 in board[:,col]:
-                valid_cols.append(col)
-        
-        if not valid_cols:
+        # If a terminal state has been reached, then return values such that they are ranked on the basis of their depths
+        if self.is_terminal(board, self.player_number):
+            return 10000 - depth, 0
+        elif self.is_terminal(board, 3-self.player_number):
+            return -10000 - depth, 0
+
+        valid_cols = self.get_valid_cols(board)
+        # If there are no more valid moves left or MAX_DEPTH has been reached, call the evaluation function
+        if not valid_cols or depth == EXPECT_MAX_DEPTH:
             return self.evaluation_function(board), 0
         
         max_val = float('-inf')
+        best_move = -1
+
         for move in valid_cols:
-            new = np.copy(board)
-            i = 0
-            for i in range(new.shape[0]-1):
-                if new[i+1, move] != 0:
-                    break
-            new[i, move] = self.player_number
+            row_max = self.get_next_open_row(board, move, self.player_number)
             
-            new_valid_cols = []
-            for col in range(board.shape[1]):
-                if 0 in board[:,col]:
-                    new_valid_cols.append(col)
-            
+            new_valid_cols = self.get_valid_cols(board)
             val = 0
+            
             for i in new_valid_cols:
-                rand = new.copy()
-                j = 0
-                for j in range(new.shape[0]-1):
-                    if new[j+1, move] != 0:
-                        break
-                rand[j, i] = 3-self.player_number
-                rand_val, _ = self.expectimax_value(rand, depth+1)
+                row_min = self.get_next_open_row(board, i, 3-self.player_number)
+                rand_val, _ = self.expectimax_value(board, depth+1)
                 val += rand_val / len(new_valid_cols)
+                board[row_min, i] = 0
+            
+            board[row_max, move] = 0
             
             if val > max_val:
                 max_val = val
@@ -197,40 +214,9 @@ class AIPlayer:
         RETURNS:
         The 0 based index of the column that represents the next move
         """
-        
-        _, best_move =  self.expectimax_value(board, 0)
+        _, best_move = self.expectimax_value(board, depth = 0)
 
         return best_move
-
-    def eval_window(self, window):
-        score = 0
-        own_scores = {0:0.0, 1:5, 2:30.0, 3:200.0}
-        opp_scores = {0:0.0, 1:5, 2:20.0, 3:400.0}
-        my_count = 0
-        opp_count = 0
-        empty_count = 0
-        for cell in window:
-            if cell == self.player_number: my_count += 1
-            elif cell == 3-self.player_number: opp_count += 1
-            else: empty_count += 1
-
-        # My (MAX) Scoring
-        if my_count == 3 and empty_count == 1:
-            score += own_scores[3]
-        elif my_count == 2 and empty_count == 2:
-            score += own_scores[2]
-        elif my_count == 1 and empty_count == 3:
-            score += own_scores[1]
-
-        # Opp (MIN) Scoring
-        if opp_count == 3 and empty_count == 1:
-            score -= opp_scores[3]
-        elif opp_count == 2 and empty_count == 2:
-            score -= opp_scores[2]
-        elif opp_count == 1 and empty_count == 3:
-            score -= opp_scores[1]
-
-        return score
 
     def evaluation_function(self, board):
         """
@@ -250,40 +236,69 @@ class AIPlayer:
         RETURNS:
         The utility value for the current board
         """
-        if self.game_completed(board, self.player_number):
+        if self.is_terminal(board, self.player_number):
             return 1000
-        elif self.game_completed(board, 3-self.player_number):
+        elif self.is_terminal(board, 3-self.player_number):
             return -1000
         
         rows, cols = board.shape
 
         score = 0
 
-        # center_col = board[:, int(cols/2)]
-        # score += (np.count_nonzero(center_col == 1) * 3)
-        # score -= (np.count_nonzero(center_col == 2) * 3)
+        center_col = board[:, int(cols/2)]
+        score += (np.count_nonzero(center_col == 1) * 3)
+        score -= (np.count_nonzero(center_col == 2) * 3)
+
+        def score_window(window):
+            """Helper function to score each 1x4 window/block"""
+            score = 0
+
+            own_scores = {0:0.0, 1:0.5, 2:3.0, 3:9.0}
+            opp_scores = {0:0.0, 1:0.5, 2:2.0, 3:40.0}
+
+            my_count = np.count_nonzero(window == self.player_number)
+            opp_count = np.count_nonzero(window == 3-self.player_number)
+            empty_count = 4 - my_count - opp_count
+            
+            # My (MAX) Scoring
+            if my_count == 3 and empty_count == 1:
+                score += own_scores[3]
+            elif my_count == 2 and empty_count == 2:
+                score += own_scores[2]
+            elif my_count == 1 and empty_count == 3:
+                score += own_scores[1]
+
+            # Opp (MIN) Scoring
+            if opp_count == 3 and empty_count == 1:
+                score -= opp_scores[3]
+            elif opp_count == 2 and empty_count == 2:
+                score -= opp_scores[2]
+            elif opp_count == 1 and empty_count == 3:
+                score -= opp_scores[1]
+
+            return score
 
         # Horizontal
         for r in range(rows):
             row_arr = board[r, :]
             for c in range(cols - 3):
-                score+=self.eval_window(row_arr[c:c+4])
+                score+=score_window(row_arr[c:c+4])
 
         # Vertical
         for c in range(cols):
             col_array = board[:, c]
             for r in range(rows - 3):
-                score+=self.eval_window(col_array[r:r+4])
+                score+=score_window(col_array[r:r+4])
 
         # Diagonal down-right
         for r in range(rows - 3):
             for c in range(cols - 3):
-                score+=self.eval_window([board[r+i, c+i] for i in range(4)])
+                score+=score_window([board[r+i, c+i] for i in range(4)])
 
         # Diagonal down-left
         for r in range(rows - 3):
             for c in range(3, cols):
-                score+=self.eval_window([board[r+i, c-i] for i in range(4)])
+                score+=score_window([board[r+i, c-i] for i in range(4)])
 
         return score
 
@@ -356,4 +371,3 @@ class HumanPlayer:
             move = int(input('Enter your move: '))
 
         return move
-
