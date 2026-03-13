@@ -1,5 +1,5 @@
 import numpy as np
-import time
+# import time
 
 MAX_DEPTH = 5
 EXPECT_MAX_DEPTH = 4
@@ -9,7 +9,7 @@ class AIPlayer:
         self.player_number = player_number
         self.type = 'ai'
         self.player_string = 'Player {}:ai'.format(player_number)
-        self.start_time = time.time()
+        # self.start_time = time.time()
     
     def is_terminal(self, board, player_num):
         """Helper function to check whether a game has reached terminal state"""
@@ -281,7 +281,7 @@ class AIPlayer:
             if empty_count == 4 - my_count:
                 is_grounded = False
                 if my_count > 0:
-                    empty_idx = window.index(0)
+                    empty_idx = np.where(window == 0)[0][0]
                     empty_r = r_indices[empty_idx]
                     empty_c = c_indices[empty_idx]
                     is_grounded = (empty_r == 5) or (board[empty_r + 1, empty_c] != 0)
