@@ -76,6 +76,10 @@ class Game:
             if self.game_completed(current_player.player_number):
                 self.game_over = True
                 self.player_string.configure(text=self.players[self.current_turn].player_string + ' wins!')
+            elif not any(0 in self.board[:, col] for col in range(self.board.shape[1])):
+                # Board is completely full with no winner — it's a draw
+                self.game_over = True
+                self.player_string.configure(text="It's a Draw!")
             else:
                 self.current_turn = int(not self.current_turn)
                 self.player_string.configure(text=self.players[self.current_turn].player_string)
