@@ -1,7 +1,7 @@
 import numpy as np
 import time
 
-MAX_DEPTH = 5
+MAX_DEPTH = 6
 EXPECT_MAX_DEPTH = 4
 
 class AIPlayer:
@@ -249,63 +249,99 @@ class AIPlayer:
         RETURNS:
         The utility value for the current board
         """
-        # if self.is_terminal(board, self.player_number):
-        #     return 10000
-        # elif self.is_terminal(board, 3-self.player_number):
-        #     return -10000
+        if self.is_terminal(board, self.player_number):
+            return 10000
+        elif self.is_terminal(board, 3-self.player_number):
+            return -10000
         
         rows, cols = board.shape
 
         score = 0
 
-        # Prioritize Center Columns -- Was leading to a tie at depth 5, works fine for depth 6
-        # center_col = board[:, int(cols/2)]
-        # score += (np.count_nonzero(center_col == self.player_number) * 3)
-        # score -= (np.count_nonzero(center_col == 3-self.player_number) * 3)
+        center_weights = [0, 1, 2, 3, 2, 1, 0]
+        for c in range(cols):
+            my_pieces = np.count_nonzero(board[:, c] == self.player_number)
+            opp_pieces = np.count_nonzero(board[:, c] == 3 - self.player_number)
+            score += (my_pieces - opp_pieces) * center_weights[c] * 3
 
-        def score_window(window):
-            """Helper function to score each 1x4 window/block"""
+        def score_window(window, r_indices, c_indices):
+            """Helper function to score each 1x4 window/block, with gravity check"""
             score = 0
 
-            my_scores  = {0:0, 1:0.5, 2:3, 3:10}
-            opp_scores = {0:0, 1:0.5, 2:2, 3:40}
+            my_grounded_scores  = {0:0, 1:1, 2:10, 3:100}
+            my_air_scores       = {0:0, 1:0.5, 2:3, 3:10}
+            
+            opp_grounded_scores = {0:0, 1:1, 2:4, 3:500} 
+            opp_air_scores      = {0:0, 1:0.5, 2:3, 3:12}
 
             my_count  = np.count_nonzero(window ==   self.player_number)
             opp_count = np.count_nonzero(window == 3-self.player_number)
             empty_count = 4 - my_count - opp_count
             
-            # My (MAX) Scoring
-            score += my_scores[my_count] if empty_count == 4 - my_count else 0
+            # --- My (MAX) Scoring ---
+            if empty_count == 4 - my_count:
+                is_grounded = False
+                if my_count > 0:
+                    empty_idx = np.where(window == 0)[0][0]
+                    empty_r = r_indices[empty_idx]
+                    empty_c = c_indices[empty_idx]
+                    is_grounded = (empty_r == 5) or (board[empty_r + 1, empty_c] != 0)
+                
+                if is_grounded:
+                    score += my_grounded_scores[my_count]
+                else:
+                    score += my_air_scores[my_count]
 
-            # Opp (MIN) Scoring
-            score -= opp_scores[opp_count] if empty_count == 4 - opp_count else 0
+            # --- Opp (MIN) Scoring ---
+            if empty_count == 4 - opp_count:
+                is_grounded = False
+                if opp_count > 0:
+                    empty_idx = np.where(window == 0)[0][0]
+                    empty_r = r_indices[empty_idx]
+                    empty_c = c_indices[empty_idx]
+                    is_grounded = (empty_r == 5) or (board[empty_r + 1, empty_c] != 0)
+
+                if is_grounded:
+                    score -= opp_grounded_scores[opp_count]
+                else:
+                    score -= opp_air_scores[opp_count]
 
             return score
 
+
         # Horizontal
         for r in range(rows):
-            row_arr = board[r, :]
             for c in range(cols - 3):
-                score+=score_window(row_arr[c:c+4])
+                window = board[r, c:c+4]
+                r_indices = [r, r, r, r]
+                c_indices = [c, c+1, c+2, c+3]
+                score += score_window(window, r_indices, c_indices)
 
-        # Vertical
+        # Vertical (No gravity check needed since verticals are always stacked on top of each other!)
         for c in range(cols):
-            col_array = board[:, c]
             for r in range(rows - 3):
-                score+=score_window(col_array[r:r+4])
+                window = board[r:r+4, c]
+                r_indices = [r, r+1, r+2, r+3]
+                c_indices = [c, c, c, c]
+                score += score_window(window, r_indices, c_indices)
 
         # Diagonal down-right
         for r in range(rows - 3):
             for c in range(cols - 3):
-                score+=score_window([board[r+i, c+i] for i in range(4)])
+                window = np.array([board[r+i, c+i] for i in range(4)])
+                r_indices = [r+i for i in range(4)]
+                c_indices = [c+i for i in range(4)]
+                score += score_window(window, r_indices, c_indices)
 
         # Diagonal down-left
         for r in range(rows - 3):
             for c in range(3, cols):
-                score+=score_window([board[r+i, c-i] for i in range(4)])
+                window = np.array([board[r+i, c-i] for i in range(4)])
+                r_indices = [r+i for i in range(4)]
+                c_indices = [c-i for i in range(4)]
+                score += score_window(window, r_indices, c_indices)
 
         return score
-
 
 class RandomPlayer:
     def __init__(self, player_number):
