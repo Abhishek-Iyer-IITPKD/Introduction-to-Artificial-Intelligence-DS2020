@@ -1,8 +1,8 @@
 # Introduction to Artificial Intelligence - Lab 3 Submission
 
 ## Submitted by:
-* Kalakuntla Parjanya - 112401108
 * Abhishek Iyer - 112401002
+* Kalakuntla Parjanya - 112401018
 
 ## How to run the code
 
