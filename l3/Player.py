@@ -1,7 +1,7 @@
 import numpy as np
 import time
 
-MAX_DEPTH = 6
+MAX_DEPTH = 5
 EXPECT_MAX_DEPTH = 4
 
 class AIPlayer:
@@ -88,7 +88,6 @@ class AIPlayer:
             val, _ = self.min_value(board, depth+1, alpha, beta)
             
             board[row, move] = 0
-            # print(f"Column {move} score: {val} at depth {depth} by MAX") 
             if val > max_val:
                 max_val = val
                 max_move = move
@@ -118,7 +117,6 @@ class AIPlayer:
             val, _ = self.max_value(board, depth+1, alpha, beta)
 
             board[row, move] = 0
-            # print(f"Column {move} score: {val} at depth {depth} by MIN") 
             if val < min_val:
                 min_val = val
                 min_move = move
@@ -149,9 +147,10 @@ class AIPlayer:
         RETURNS:
         The 0 based index of the column that represents the next move
         """
-        self.start_time = time.time()
+        # self.start_time = time.time()
         _, best_move = self.max_value(board, depth = 0, alpha = float('-inf'), beta = float('inf'))
-        print(f"AI Player {self.player_number} took {time.time() - self.start_time} seconds to make move")
+        # print(f"AI Player {self.player_number} took {time.time() - self.start_time} seconds to make move")
+
         return best_move
 
     def max_for_chance(self, board, depth):
@@ -225,9 +224,9 @@ class AIPlayer:
         RETURNS:
         The 0 based index of the column that represents the next move
         """
-        self.start_time = time.time()
+        # self.start_time = time.time()
         _, best_move = self.max_for_chance(board, depth = 0)
-        print(f"AI Player took {time.time() - self.start_time} seconds to make move")
+        # print(f"AI Player took {time.time() - self.start_time} seconds to make move")
 
         return best_move
 
@@ -265,7 +264,7 @@ class AIPlayer:
             score += (my_pieces - opp_pieces) * center_weights[c] * 3
 
         def score_window(window, r_indices, c_indices):
-            """Helper function to score each 1x4 window/block, with gravity check"""
+            """Helper function to score each 1x4 window, with gravity check"""
             score = 0
 
             my_grounded_scores  = {0:0, 1:1, 2:10, 3:100}
@@ -282,7 +281,7 @@ class AIPlayer:
             if empty_count == 4 - my_count:
                 is_grounded = False
                 if my_count > 0:
-                    empty_idx = np.where(window == 0)[0][0]
+                    empty_idx = window.index(0)
                     empty_r = r_indices[empty_idx]
                     empty_c = c_indices[empty_idx]
                     is_grounded = (empty_r == 5) or (board[empty_r + 1, empty_c] != 0)
@@ -317,7 +316,7 @@ class AIPlayer:
                 c_indices = [c, c+1, c+2, c+3]
                 score += score_window(window, r_indices, c_indices)
 
-        # Vertical (No gravity check needed since verticals are always stacked on top of each other!)
+        # Vertical
         for c in range(cols):
             for r in range(rows - 3):
                 window = board[r:r+4, c]
