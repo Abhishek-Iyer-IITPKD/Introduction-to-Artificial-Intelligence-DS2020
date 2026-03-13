@@ -1,8 +1,8 @@
 import numpy as np
 import time
 
-MAX_DEPTH = 7
-EXPECT_MAX_DEPTH = 2
+MAX_DEPTH = 5
+EXPECT_MAX_DEPTH = 4
 
 class AIPlayer:
     def __init__(self, player_number):
@@ -154,40 +154,55 @@ class AIPlayer:
         print(f"AI Player {self.player_number} took {time.time() - self.start_time} seconds to make move")
         return best_move
 
-    def expectimax_value(self, board, depth):
+    def max_for_chance(self, board, depth):
         # If a terminal state has been reached, then return values such that they are ranked on the basis of their depths
-        if self.is_terminal(board, self.player_number):
-            return 10000 - depth, 0
-        elif self.is_terminal(board, 3-self.player_number):
-            return -10000 - depth, 0
+        if self.is_terminal(board, 3-self.player_number):
+            return -10000 + depth, 0
 
         valid_cols = self.get_valid_cols(board)
-        # If there are no more valid moves left or MAX_DEPTH has been reached, call the evaluation function
+        # If there are no more valid moves left or EXPECT_MAX_DEPTH has been reached, call the evaluation function
         if not valid_cols or depth == EXPECT_MAX_DEPTH:
             return self.evaluation_function(board), 0
 
         max_val = float('-inf')
-        best_move = -1
+        max_move = -1
 
         for move in valid_cols:
-            row_max = self.fill_next_open_row(board, move, self.player_number)
+            row = self.fill_next_open_row(board, move, self.player_number)
 
-            new_valid_cols = self.get_valid_cols(board)
-            val = 0
-
-            for i in new_valid_cols:
-                row_chance = self.fill_next_open_row(board, i, 3-self.player_number)
-                rand_val, _ = self.expectimax_value(board, depth+1)
-                val += rand_val / len(new_valid_cols)
-                board[row_chance, i] = 0
-
-            board[row_max, move] = 0
+            val, _ = self.chance_move(board, depth+1)
+            
+            board[row, move] = 0
 
             if val > max_val:
                 max_val = val
-                best_move = move
+                max_move = move
 
-        return max_val, best_move
+        return max_val, max_move
+
+    def chance_move(self, board, depth):
+        # If a terminal state has been reached, then return values such that they are ranked on the basis of their depths
+        if self.is_terminal(board, self.player_number):
+            return 10000 - depth, 0
+
+        valid_cols = self.get_valid_cols(board)
+        # If there are no more valid moves left or EXPECT_MAX_DEPTH has been reached, call the evaluation function
+        if not valid_cols or depth == EXPECT_MAX_DEPTH:
+            return self.evaluation_function(board), 0
+
+        val = 0
+        chance_move = -1
+
+        for move in valid_cols:
+            row = self.fill_next_open_row(board, move, 3-self.player_number)
+
+            max_val, _ = self.max_for_chance(board, depth+1)
+
+            board[row, move] = 0
+            
+            val += max_val / len(valid_cols)
+
+        return val, chance_move
     
     def get_expectimax_move(self, board):
         """
@@ -210,7 +225,9 @@ class AIPlayer:
         RETURNS:
         The 0 based index of the column that represents the next move
         """
-        _, best_move = self.expectimax_value(board, depth = 0)
+        self.start_time = time.time()
+        _, best_move = self.max_for_chance(board, depth = 0)
+        print(f"AI Player took {time.time() - self.start_time} seconds to make move")
 
         return best_move
 
