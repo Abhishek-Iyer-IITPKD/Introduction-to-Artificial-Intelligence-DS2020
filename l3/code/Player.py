@@ -1,7 +1,7 @@
 import numpy as np
 # import time
 
-MAX_DEPTH = 5
+MAX_DEPTH = 6
 EXPECT_MAX_DEPTH = 4
 
 class AIPlayer:
