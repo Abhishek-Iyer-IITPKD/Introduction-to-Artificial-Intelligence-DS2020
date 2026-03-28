@@ -30,38 +30,41 @@ if __name__=='__main__':
                 grid = grid.replace("\t", "")
                 
                 if len(grid) != 81:
-                    raise Exception("Invalid grid size")
+                    print("Error: Invalid grid size")
+                    with open(output_file, 'a') as f:
+                        f.write("No solution found\n")
+                    continue
                 
                 clauses = []
+                
+                # Each cell has atleast one value
+                for i in range(9):
+                    for j in range(9):
+                        clauses.append([var(i,j,d) for d in range(1,10)])
+                
+                # Each cell has atmost one value
+                for i in range(9):
+                    for j in range(9):
+                        for d in range(1,10):
+                            for d1 in range(d+1,10):
+                                clauses.append([-var(i,j,d), -var(i,j,d1)])
+
+                # Each row and column has all values 1-9
+                for i in range(9):
+                    for j in range(9):
+                        make_diff([[i, j] for j in range(9)])
+                        make_diff([[j, i] for j in range(9)])
+                
+                # Each 3x3 box has all values 1-9
+                for i in range(3):
+                    for j in range(3):
+                        make_diff([[3*i+k%3, 3*j+k//3] for k in range(9)])
                 
                 # Existing cells
                 for i in range(9):
                     for j in range(9):
                         if grid[9*i+j] != '.':
                             clauses.append([var(i,j,int(grid[9*i+j]))])
-                
-                # Cells are unique
-                for i in range(9):
-                    for j in range(9):
-                        for d in range(1,10):
-                            for d1 in range(d+1,10):
-                                clauses.append([-var(i,j,d), -var(i,j,d1)])
-                
-                # Cells are from 1-9
-                for i in range(9):
-                    for j in range(9):
-                        clauses.append([var(i,j,d) for d in range(1,10)])
-
-                # Rows and columns are from 1-9
-                for i in range(9):
-                    for j in range(9):
-                        make_diff([[i, j] for j in range(9)])
-                        make_diff([[j, i] for j in range(9)])
-                
-                # 3x3 boxes are from 1-9
-                for i in range(3):
-                    for j in range(3):
-                        make_diff([[3*i+k%3, 3*j+k//3] for k in range(9)])
                 
                 solution = pycosat.solve(clauses)
                 # for i in range(9):
@@ -70,6 +73,18 @@ if __name__=='__main__':
                 #             if var(i,j,d) in solution:
                 #                 print(d,end="")
                 # print()
+                        
+                if solution == "UNSAT":
+                    print("This sudoku is unsolvable")
+                    with open(output_file, 'a') as f:
+                        f.write("No solution found\n")
+                    continue
+                        
+                if solution == "UNKNOWN":
+                    print("This sudoku took too long to solve")
+                    with open(output_file, 'a') as f:
+                        f.write("No solution found\n")
+                    continue
                         
                 with open(output_file, 'a') as f:
                     for i in range(9):
