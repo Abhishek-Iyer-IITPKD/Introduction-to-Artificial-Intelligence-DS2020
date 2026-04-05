@@ -85,12 +85,18 @@ if __name__=='__main__':
                         f.write("No solution found\n")
                     continue
                         
-                with open(output_file, 'a') as f:
-                    for i in range(9):
-                        for j in range(9):
-                            for d in range(1,10):
-                                if var(i,j,d) in solution:
-                                    f.write(str(d))
-                    f.write("\n")
+                if isinstance(solution, list):
+                    with open(output_file, 'a') as f:
+                        for i in range(9):
+                            for j in range(9):
+                                for d in range(1,10):
+                                    if var(i,j,d) in solution:
+                                        f.write(str(d))
+                        f.write("\n")
+                else:
+                    print("Error: Invalid solution")
+                    with open(output_file, 'a') as f:
+                        f.write("No solution found\n")
+                    continue
     except FileNotFoundError:
         print("Error: The file was not found.")
