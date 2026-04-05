@@ -1,7 +1,6 @@
 import sys, os
 import pycosat
 from collections import defaultdict
-import numpy as np
 
 def var(row, col, digit):
     return 81*row+9*col+digit
