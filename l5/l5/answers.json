@@ -1,0 +1,49 @@
+{
+    "q3": {
+      "train_accuracy_default":    "__fill__",
+      "test_accuracy_default":     "__fill__",
+      "tree_depth_default":        "__fill__",
+      "top_feature_1":             "__fill__",
+      "top_feature_2":             "__fill__"
+    },
+    "q4": {
+      "train_accuracy_depth3":            "__fill__",
+      "test_accuracy_depth3":             "__fill__",
+      "accuracy_comparison_reasoning":    "__one line__",
+      "most_important_feature_from_plot": "__fill__",
+      "plot_identification_reasoning":    "__fill__",
+      "most_important_feature_verified":  "__fill__",
+      "verification_reasoning":           "__one line__"
+    },
+    "q7": {
+      "results_grid": {
+        "columns": ["tree_depth", "train_accuracy", "test_accuracy", "top_feature_1", "top_feature_2"],
+        "after_noise": [
+          { "seed": 0, "tree_depth": "__fill__", "train_accuracy": "__fill__", "test_accuracy": "__fill__", "top_feature_1": "__fill__", "top_feature_2": "__fill__" },
+          { "seed": 1, "tree_depth": "__fill__", "train_accuracy": "__fill__", "test_accuracy": "__fill__", "top_feature_1": "__fill__", "top_feature_2": "__fill__" },
+          { "seed": 2, "tree_depth": "__fill__", "train_accuracy": "__fill__", "test_accuracy": "__fill__", "top_feature_1": "__fill__", "top_feature_2": "__fill__" },
+          { "seed": 3, "tree_depth": "__fill__", "train_accuracy": "__fill__", "test_accuracy": "__fill__", "top_feature_1": "__fill__", "top_feature_2": "__fill__" },
+          { "seed": 4, "tree_depth": "__fill__", "train_accuracy": "__fill__", "test_accuracy": "__fill__", "top_feature_1": "__fill__", "top_feature_2": "__fill__" }
+        ]
+      },
+      "observation_accuracy": { "answer": "__fill__", "reasoning": "__one line__" },
+      "observation_depth":    { "answer": "__fill__", "reasoning": "__one line__" },
+      "observation_features": { "answer": "__fill__", "reasoning": "__one line__" }
+    },
+    "q9": {
+  "q9_1": { "answer": "__fill__", "reasoning": "__one line__" },
+  "q9_2": {
+    "best_depth": "__fill__",
+    "best_test_accuracy": "__fill__",
+    "deployment_choice": "__fill__",
+    "reasoning": "__one line__"
+  },
+  "q9_3": {
+    "gap_at_depth_3": "__fill__",
+    "gap_at_depth_10": "__fill__",
+    "gap_growth": "__fill__",
+    "answer": "__fill__",
+    "reasoning": "__one line__"
+  }
+}
+  }
