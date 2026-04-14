@@ -52,7 +52,11 @@ def load_titanic_data(data_path: str) -> pd.DataFrame:
         DataFrame with 10 columns (9 features + 1 label).
     """
     # TODO: read the csv file using the header already present in Titanic.csv
-    raise NotImplementedError("to do: Implement load_titanic_data")
+    df = pd.read_csv("Titanic.csv")
+    print(f"Dataset loaded with shape: {df.shape}, Dataset head:")
+    print(df.head())
+    print()
+    return df
 
 
 def preprocess_data(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
@@ -76,7 +80,14 @@ def preprocess_data(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
     # 2) Select FEATURE_COLUMNS into X
     # 3) Select TARGET_COLUMN into y
     # 4) Return X and y
-    raise NotImplementedError("to do: Implement preprocess_data")
+    X = df.drop(columns=['survived'])
+    y = df['survived']
+    print(f"X loaded with shape: {X.shape}, Dataset head:")
+    print(X.head())
+    print(f"y loaded with shape: {y.shape}, Dataset head:")
+    print(y.head())
+    print()
+    return X, y
 
 
 
@@ -93,7 +104,17 @@ def create_train_test_split(
     Use stratified split to preserve class ratio.
     """
     # TODO: call train_test_split with stratify=y
-    raise NotImplementedError("to do: Implement create_train_test_split")
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, stratify=y, random_state=1)
+    print(f"X_train loaded with shape: {X_train.shape}, Dataset head:")
+    print(X_train.head())
+    print(f"X_test loaded with shape: {X_test.shape}, Dataset head:")
+    print(X_test.head())
+    print(f"y_train loaded with shape: {y_train.shape}, Dataset head:")
+    print(y_train.head())
+    print(f"y_test loaded with shape: {y_test.shape}, Dataset head:")
+    print(y_test.head())
+    print()
+    return X_train, X_test, y_train, y_test
 
 
 
