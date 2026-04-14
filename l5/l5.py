@@ -51,7 +51,7 @@ def load_titanic_data(data_path: str) -> pd.DataFrame:
     Returns:
         DataFrame with 10 columns (9 features + 1 label).
     """
-    # to do: read the csv file using the header already present in Titanic.csv
+    # TODO: read the csv file using the header already present in Titanic.csv
     raise NotImplementedError("to do: Implement load_titanic_data")
 
 
@@ -71,7 +71,7 @@ def preprocess_data(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
         X: feature DataFrame containing FEATURE_COLUMNS
         y: label Series containing TARGET_COLUMN
     """
-    # to do:
+    # TODO:
     # 1) Copy the input DataFrame
     # 2) Select FEATURE_COLUMNS into X
     # 3) Select TARGET_COLUMN into y
@@ -92,7 +92,7 @@ def create_train_test_split(
 
     Use stratified split to preserve class ratio.
     """
-    # to do: call train_test_split with stratify=y
+    # TODO: call train_test_split with stratify=y
     raise NotImplementedError("to do: Implement create_train_test_split")
 
 
@@ -109,7 +109,7 @@ def train_decision_tree(
     For baseline model, keep max_depth=None.
     For constrained model, set max_depth=3.
     """
-    # to do:
+    # TODO:
     # 1) Initialize DecisionTreeClassifier from sklearn with the given max_depth
     # 2) Fit on X_train, y_train
     # 3) Return fitted model
@@ -131,7 +131,7 @@ def plot_decision_tree(
         class_names: Optional list of class label names (e.g. ["Not Survived", "Survived"])
         save_path: Path to save the plot image
     """
-    # to do:
+    # TODO:
     # 1) Create a matplotlib figure with an appropriate size (e.g. figsize=(20, 10))
     # 2) Call plot_tree with the model, feature_names, class_names, and filled=True
     # 3) Add a title to the plot (e.g. "Decision Tree Visualization")
@@ -151,7 +151,7 @@ def top_k_features(
     - Sort by importance descending
     - If equal, sort by feature name ascending
     """
-    # to do: implement top_k_features with the deterministic tie-break
+    # TODO: implement top_k_features with the deterministic tie-break
     # Hint: use model.feature_importances_
     raise NotImplementedError("to do: Implement top_k_features")
 
@@ -170,7 +170,7 @@ def evaluate_model(
     Required dictionary keys:
         train_accuracy, test_accuracy, depth, top_2_features
     """
-    # to do: compute train/test accuracy, tree depth, and top 2 features using top_k_features
+    # TODO: compute train/test accuracy, tree depth, and top 2 features using top_k_features
     raise NotImplementedError("to do: Implement evaluate_model")
 
 
@@ -182,7 +182,7 @@ def flip_label(lab: int, p_noise: float, rng: np.random.Generator) -> int:
 
     If random_value < p_noise, convert 0->1 or 1->0.
     """
-    # to do: implement probabilistic label flip using rng
+    # TODO: implement probabilistic label flip using rng
     raise NotImplementedError("to do: Implement flip_label")
 
 
@@ -202,7 +202,7 @@ def add_label_noise(
     Returns:
         Noisy labels Series with same index as y_train.
     """
-    # to do:
+    # TODO:
     # 1) Create rng = np.random.default_rng(seed)
     # 2) Apply flip_label over y_train
     # 3) Return noisy label Series
@@ -224,7 +224,7 @@ def run_noise_experiment(
     Required dictionary keys:
         train_accuracy, test_accuracy, depth, top_2_features, noisy_labels
     """
-    # to do:
+    # TODO:
     # 1) Create noisy labels with add_label_noise
     # 2) Train default tree on (X_train, noisy_labels)
     # 3) Evaluate using evaluate_model
@@ -266,7 +266,7 @@ def depth_accuracy_curve(
     Returns:
         (depth_values, train_accuracies, test_accuracies)
     """
-    # to do: train one tree per depth and collect score lists
+    # TODO: train one tree per depth and collect score lists
     raise NotImplementedError("to do: Implement depth_accuracy_curve")
 
 
