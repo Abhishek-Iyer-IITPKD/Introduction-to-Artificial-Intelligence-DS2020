@@ -134,7 +134,9 @@ def train_decision_tree(
     # 1) Initialize DecisionTreeClassifier from sklearn with the given max_depth
     # 2) Fit on X_train, y_train
     # 3) Return fitted model
-    raise NotImplementedError("to do: Implement train_decision_tree")
+    dtc = DecisionTreeClassifier(max_depth=max_depth)
+    dtc.fit(X_train, y_train)
+    return dtc
 
 
 def plot_decision_tree(
@@ -157,7 +159,12 @@ def plot_decision_tree(
     # 2) Call plot_tree with the model, feature_names, class_names, and filled=True
     # 3) Add a title to the plot (e.g. "Decision Tree Visualization")
     # 4) Save the plot to save_path and close the figure
-    raise NotImplementedError("to do: Implement plot_decision_tree")
+    plt.figure(figsize=(20, 10))
+    plot_tree(model, feature_names=feature_names, class_names=class_names, filled=True)
+    plt.title("Decision Tree Visualization")
+    plt.savefig(save_path)
+    plt.close()
+    # raise NotImplementedError("to do: Implement plot_decision_tree")
 
 
 def top_k_features(
@@ -174,7 +181,8 @@ def top_k_features(
     """
     # TODO: implement top_k_features with the deterministic tie-break
     # Hint: use model.feature_importances_
-    raise NotImplementedError("to do: Implement top_k_features")
+    sorted_importances = sorted(zip(feature_names, model.feature_importances_), key=lambda x: x[1], reverse=True)
+    return sorted_importances[:k]
 
 
 def evaluate_model(
@@ -192,7 +200,19 @@ def evaluate_model(
         train_accuracy, test_accuracy, depth, top_2_features
     """
     # TODO: compute train/test accuracy, tree depth, and top 2 features using top_k_features
-    raise NotImplementedError("to do: Implement evaluate_model")
+    summary = {}
+    summary["train_accuracy"] = model.score(X_train, y_train)
+    summary["test_accuracy"] = model.score(X_test, y_test)
+    summary["depth"] = model.get_depth()
+    summary["top_2_features"] = top_k_features(model, X_train.columns, k=2)
+    print(f"Model params: {model.get_params()}")
+    print(f"Train Accuracy: {summary['train_accuracy']}")
+    print(f"Test Accuracy: {summary['test_accuracy']}")
+    print(f"Feature importances: {model.feature_importances_}")
+    print(f"Top 2 features: {summary['top_2_features']}")
+    print(f"Depth: {summary['depth']}")
+    print()
+    return summary
 
 
 
