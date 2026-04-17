@@ -164,7 +164,6 @@ def plot_decision_tree(
     plt.title("Decision Tree Visualization")
     plt.savefig(save_path)
     plt.close()
-    # raise NotImplementedError("to do: Implement plot_decision_tree")
 
 
 def top_k_features(
@@ -181,7 +180,7 @@ def top_k_features(
     """
     # TODO: implement top_k_features with the deterministic tie-break
     # Hint: use model.feature_importances_
-    sorted_importances = sorted(zip(feature_names, model.feature_importances_), key=lambda x: x[1], reverse=True)
+    sorted_importances = sorted(zip(feature_names, model.feature_importances_), key=lambda x: (-x[1], x[0]))
     return sorted_importances[:k]
 
 
@@ -224,7 +223,11 @@ def flip_label(lab: int, p_noise: float, rng: np.random.Generator) -> int:
     If random_value < p_noise, convert 0->1 or 1->0.
     """
     # TODO: implement probabilistic label flip using rng
-    raise NotImplementedError("to do: Implement flip_label")
+    val = rng.random()
+    if val < p_noise:
+        return 1-lab
+    else:
+        return lab
 
 
 def add_label_noise(
@@ -247,7 +250,9 @@ def add_label_noise(
     # 1) Create rng = np.random.default_rng(seed)
     # 2) Apply flip_label over y_train
     # 3) Return noisy label Series
-    raise NotImplementedError("to do: Implement add_label_noise")
+    rng = np.random.default_rng(seed)
+    flip_labels = y_train.apply(lambda lab: flip_label(lab, p_noise, rng))
+    return flip_labels
 
 #Q6 and Q7. Train a DT on the noisy dataset
 def run_noise_experiment(
