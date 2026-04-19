@@ -203,7 +203,7 @@ def evaluate_model(
     summary["train_accuracy"] = model.score(X_train, y_train)
     summary["test_accuracy"] = model.score(X_test, y_test)
     summary["depth"] = model.get_depth()
-    summary["top_2_features"] = top_k_features(model, X_train.columns, k=2)
+    summary["top_2_features"] = top_k_features(model, X_train.columns.tolist(), k=2)
     print(f"Model params: {model.get_params()}")
     print(f"Train Accuracy: {summary['train_accuracy']}")
     print(f"Test Accuracy: {summary['test_accuracy']}")
@@ -275,7 +275,20 @@ def run_noise_experiment(
     # 2) Train default tree on (X_train, noisy_labels)
     # 3) Evaluate using evaluate_model
     # 4) Include noisy_labels in returned dictionary
-    raise NotImplementedError("to do: Implement run_noise_experiment")
+    noisy_labels = add_label_noise(y_train, p_noise=p_noise, seed=seed)
+    model = DecisionTreeClassifier()
+    model.fit(X_train, noisy_labels)
+    summary = evaluate_model(
+        model,
+        X_train,
+        y_train,
+        X_test,
+        y_test,
+        feature_names=feature_names,
+    )
+    summary["model"] = model
+    summary["noisy_labels"] = noisy_labels
+    return summary
 
 # #Q7. Repeating noise experiments for observations
 # def repeat_noise_experiments(
@@ -313,7 +326,14 @@ def depth_accuracy_curve(
         (depth_values, train_accuracies, test_accuracies)
     """
     # TODO: train one tree per depth and collect score lists
-    raise NotImplementedError("to do: Implement depth_accuracy_curve")
+    train_accuracies = []
+    test_accuracies = []
+    for depth in depth_values:
+        model = DecisionTreeClassifier(max_depth=depth)
+        model.fit(X_train, y_train)
+        train_accuracies.append(model.score(X_train, y_train))
+        test_accuracies.append(model.score(X_test, y_test))
+    return depth_values, train_accuracies, test_accuracies
 
 
 def plot_depth_accuracy(
