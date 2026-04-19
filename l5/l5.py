@@ -290,26 +290,54 @@ def run_noise_experiment(
     summary["noisy_labels"] = noisy_labels
     return summary
 
-# #Q7. Repeating noise experiments for observations
-# def repeat_noise_experiments(
-#     X_train: pd.DataFrame,
-#     y_train: pd.Series,
-#     X_test: pd.DataFrame,
-#     y_test: pd.Series,
-#     feature_names: list[str],
-#     p_noise: float = 0.1,
-#     n_runs: int = 5,
-#     base_seed: int = 100,
-# ) -> dict:
-#     """
-#     Repeat noise experiment n_runs times and return aggregate statistics.
+#Q7. Repeating noise experiments for observations
+def repeat_noise_experiments(
+    X_train: pd.DataFrame,
+    y_train: pd.Series,
+    X_test: pd.DataFrame,
+    y_test: pd.Series,
+    feature_names: list[str],
+    p_noise: float = 0.1,
+    n_runs: int = 5,
+    base_seed: int = 100,
+) -> dict:
+    """
+    Repeat noise experiment n_runs times and return aggregate statistics.
 
-#     Returns:
-#     ((average_train_accuracy, average_test_accuracy, average_depth, top_2_feature_frequencies))
-#     """
-#     raise NotImplementedError("to do: Implement repeat_noise_experiments")
-    
+    Returns:
+    ((average_train_accuracy, average_test_accuracy, average_depth, top_2_feature_frequencies))
+    """
+    sum_train_acc = 0
+    sum_test_acc = 0
+    sum_depth = 0
+    sum_top_2_features = 0
+    for seed in range(base_seed, base_seed + n_runs):
+        summary = run_noise_experiment(
+            X_train,
+            y_train,
+            X_test,
+            y_test,
+            feature_names=feature_names,
+            p_noise=p_noise,
+            seed=seed,
+        )
+        print(f"Seed {seed}: {summary}")
+        sum_train_acc += summary["train_accuracy"]
+        sum_test_acc += summary["test_accuracy"]
+        sum_depth += summary["depth"]
+        sum_top_2_features += len(set(summary["top_2_features"]))
 
+    average_train_accuracy = sum_train_acc / n_runs
+    average_test_accuracy = sum_test_acc / n_runs
+    average_depth = sum_depth / n_runs
+    average_top_2_features = sum_top_2_features / n_runs
+
+    return {
+        "average_train_accuracy": average_train_accuracy,
+        "average_test_accuracy": average_test_accuracy,
+        "average_depth": average_depth,
+        "average_top_2_features": average_top_2_features
+    }
 
 #Q8 and Q9. Train and test accuracy plot vs depth for observations
 def depth_accuracy_curve(
