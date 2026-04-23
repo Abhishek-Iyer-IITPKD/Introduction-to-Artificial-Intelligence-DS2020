@@ -1,49 +1,49 @@
 {
     "q3": {
-      "train_accuracy_default":    "__fill__",
-      "test_accuracy_default":     "__fill__",
-      "tree_depth_default":        "__fill__",
-      "top_feature_1":             "__fill__",
-      "top_feature_2":             "__fill__"
+      "train_accuracy_default":    "0.9703915950334289",
+      "test_accuracy_default":     "0.7595419847328244",
+      "tree_depth_default":        "21",
+      "top_feature_1":             "gender",
+      "top_feature_2":             "fare"
     },
     "q4": {
-      "train_accuracy_depth3":            "__fill__",
-      "test_accuracy_depth3":             "__fill__",
-      "accuracy_comparison_reasoning":    "__one line__",
-      "most_important_feature_from_plot": "__fill__",
-      "plot_identification_reasoning":    "__fill__",
-      "most_important_feature_verified":  "__fill__",
-      "verification_reasoning":           "__one line__"
+      "train_accuracy_depth3":            "0.8175740210124164",
+      "test_accuracy_depth3":             "0.8129770992366412",
+      "accuracy_comparison_reasoning":    "Decreasing the depth reduces overfitting as the model does not grow too deep, so training accuracy decreases but test accuracy improves",
+      "most_important_feature_from_plot": "gender",
+      "plot_identification_reasoning":    "Root node gives the best attribute for split, so the first split feature is most important",
+      "most_important_feature_verified":  "gender",
+      "verification_reasoning":           "Feature importance values show gender has the highest contribution"
     },
     "q7": {
       "results_grid": {
         "columns": ["tree_depth", "train_accuracy", "test_accuracy", "top_feature_1", "top_feature_2"],
         "after_noise": [
-          { "seed": 0, "tree_depth": "__fill__", "train_accuracy": "__fill__", "test_accuracy": "__fill__", "top_feature_1": "__fill__", "top_feature_2": "__fill__" },
-          { "seed": 1, "tree_depth": "__fill__", "train_accuracy": "__fill__", "test_accuracy": "__fill__", "top_feature_1": "__fill__", "top_feature_2": "__fill__" },
-          { "seed": 2, "tree_depth": "__fill__", "train_accuracy": "__fill__", "test_accuracy": "__fill__", "top_feature_1": "__fill__", "top_feature_2": "__fill__" },
-          { "seed": 3, "tree_depth": "__fill__", "train_accuracy": "__fill__", "test_accuracy": "__fill__", "top_feature_1": "__fill__", "top_feature_2": "__fill__" },
-          { "seed": 4, "tree_depth": "__fill__", "train_accuracy": "__fill__", "test_accuracy": "__fill__", "top_feature_1": "__fill__", "top_feature_2": "__fill__" }
+          { "seed": 0, "tree_depth": "28", "train_accuracy": "0.8930", "test_accuracy": "0.7176", "top_feature_1": "age", "top_feature_2": "fare" },
+          { "seed": 1, "tree_depth": "28", "train_accuracy": "0.8949", "test_accuracy": "0.7176", "top_feature_1": "age", "top_feature_2": "fare" },
+          { "seed": 2, "tree_depth": "23", "train_accuracy": "0.9102", "test_accuracy": "0.7176", "top_feature_1": "fare", "top_feature_2": "age" },
+          { "seed": 3, "tree_depth": "21", "train_accuracy": "0.8844", "test_accuracy": "0.7328", "top_feature_1": "fare", "top_feature_2": "age" },
+          { "seed": 4, "tree_depth": "25", "train_accuracy": "0.8959", "test_accuracy": "0.7023", "top_feature_1": "fare", "top_feature_2": "age" }
         ]
       },
-      "observation_accuracy": { "answer": "__fill__", "reasoning": "__one line__" },
-      "observation_depth":    { "answer": "__fill__", "reasoning": "__one line__" },
-      "observation_features": { "answer": "__fill__", "reasoning": "__one line__" }
+      "observation_accuracy": { "answer": "The training and test accuracy decrease on adding noise", "reasoning": "The noise changes labels, so the model learns wrong patterns, leading to lower accuracy" },
+      "observation_depth":    { "answer": "The depth increases on adding noise", "reasoning": "The noise adds complexity, so the model grows deeper to fit the noisy data" },
+      "observation_features": { "answer": "The features are completely different on adding noise", "reasoning": "Noise affects feature-label relation, so important features can shift" }
     },
     "q9": {
-  "q9_1": { "answer": "__fill__", "reasoning": "__one line__" },
+  "q9_1": { "answer": "As the max_depth increases, the training accuracy increases, but the test accuracy decreases after depth 4", "reasoning": "As the max_depth increases, the model starts fitting noise and therefore overfits to the training data" },
   "q9_2": {
-    "best_depth": "__fill__",
-    "best_test_accuracy": "__fill__",
-    "deployment_choice": "__fill__",
-    "reasoning": "__one line__"
+    "best_depth": "3",
+    "best_test_accuracy": "8129770992366412",
+    "deployment_choice": "Depth 3",
+    "reasoning": "Depth 3 gives the highest test accuracy, so it is the best choice for deployment as it generalizes better to unseen data"
   },
   "q9_3": {
-    "gap_at_depth_3": "__fill__",
-    "gap_at_depth_10": "__fill__",
-    "gap_growth": "__fill__",
-    "answer": "__fill__",
-    "reasoning": "__one line__"
+    "gap_at_depth_3": "0.0045969217757752",
+    "gap_at_depth_10": "0.1458948504268831",
+    "gap_growth": "Increase of 0.1412979286511079",
+    "answer": "The gap increases significantly from depth 3 to depth 10",
+    "reasoning": "As the max_depth increases, the model starts overfitting to the training data, so the training accuracy increases while the test accuracy decreases, leading to a larger gap between them. This indicates that the model is not generalizing well to unseen data at higher depths."
   }
 }
   }
