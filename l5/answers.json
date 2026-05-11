@@ -34,7 +34,7 @@
   "q9_1": { "answer": "As the max_depth increases, the training accuracy increases, but the test accuracy decreases after depth 4", "reasoning": "As the max_depth increases, the model starts fitting noise and therefore overfits to the training data" },
   "q9_2": {
     "best_depth": "3",
-    "best_test_accuracy": "8129770992366412",
+    "best_test_accuracy": "0.8129770992366412",
     "deployment_choice": "Depth 3",
     "reasoning": "Depth 3 gives the highest test accuracy, so it is the best choice for deployment as it generalizes better to unseen data"
   },
